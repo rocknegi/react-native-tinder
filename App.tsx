@@ -1,9 +1,18 @@
-import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, Text, View } from "react-native";
-import tw from "tailwind-rn";
 import StackNavigator from "./navigation/StackNavigator";
+import { NavigationContainer } from "@react-navigation/native";
+import { AuthProvider } from "./hooks/useAuth";
 
 export default function App() {
-  return <StackNavigator />;
+  return (
+    <NavigationContainer>
+      {/* HOC 
+      wraps the whole app so every child has the access to the 
+      global store
+      */}
+      <AuthProvider>
+        <StackNavigator />
+      </AuthProvider>
+    </NavigationContainer>
+  );
 }
