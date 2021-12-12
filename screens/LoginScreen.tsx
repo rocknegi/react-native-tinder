@@ -13,10 +13,10 @@ interface Params {
 }
 
 const LoginScreen = () => {
-  const { signInWithGoogle }: any = useAuth();
+  const { signInWithGoogle, loading }: any = useAuth();
   return (
     <View>
-      <Text>Login</Text>
+      <Text>{loading ? "Loading..." : "Login to the app"}</Text>
       <Button title="login" onPress={signInWithGoogle} />
     </View>
   );

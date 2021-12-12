@@ -1,9 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import * as Google from "expo-google-app-auth";
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithCredential,
+  signOut,
 } from "firebase/auth";
 import { ANDROID_CLIENT_ID, IOS_CLIENT_ID } from "@env";
 
@@ -15,13 +22,17 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }: { children: {} }) => {
   const [error, setError] = useState<any>();
   const [user, setUser] = useState<{}>();
+  const [loadingInitial, setInitialLoading] = useState<Boolean>(false);
+  const [loading, setLoading] = useState<Boolean>(false);
 
   useEffect(
     () =>
       // Subcribe to firebase OAuth + cleanup
-      onAuthStateChanged(auth, () => {
-        if (auth.currentUser) setUser(auth.currentUser);
-        else setUser({});
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setUser(user);
+          setInitialLoading(false);
+        } else setUser("");
       }),
     []
   );
@@ -33,6 +44,7 @@ export const AuthProvider = ({ children }: { children: {} }) => {
   };
 
   const signInWithGoogle = async (): Promise<void> => {
+    setLoading(true);
     try {
       const res = await Google.logInAsync(config);
 
@@ -44,16 +56,39 @@ export const AuthProvider = ({ children }: { children: {} }) => {
     } catch (error) {
       setError(error);
     }
+    setLoading(false);
   };
+
+  const logout = () => {
+    setLoading(true);
+
+    try {
+      signOut(auth);
+      setUser("");
+    } catch (error) {
+      setError(error);
+    }
+    setLoading(false);
+    console.log(user);
+  };
+
+  const memoedvalue = useMemo(
+    () => ({
+      user,
+      loading,
+      error,
+      signInWithGoogle,
+      logout,
+    }),
+    [user, loading, error]
+  );
+
   return (
     <AuthContext.Provider
       // Global store
-      value={{
-        user: user,
-        signInWithGoogle,
-      }}
+      value={memoedvalue}
     >
-      {children}
+      {!loadingInitial && children}
     </AuthContext.Provider>
   );
 };
