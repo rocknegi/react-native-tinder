@@ -10,17 +10,14 @@ import {
   TouchableOpacity,
 } from "react-native";
 import tw from "tailwind-rn";
+import { useAuthTypes } from "../hooks/types";
 
 import { useAuth } from "../hooks/useAuth";
-
-interface Params {
-  signInWithGoogle?: (ev: NativeSyntheticEvent<NativeTouchEvent>) => void;
-}
 
 const LoginScreen = () => {
   const navigation = useNavigation();
 
-  const { signInWithGoogle, loading }: any = useAuth();
+  const { signInWithGoogle, loading }: useAuthTypes = useAuth();
   return (
     <View style={tw("flex-1")}>
       <ImageBackground

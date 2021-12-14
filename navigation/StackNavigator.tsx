@@ -6,22 +6,23 @@ import HomeScreen from "../screens/HomeScreen";
 import ChatScreen from "../screens/ChatScreen";
 import LoginScreen from "../screens/LoginScreen";
 import { useAuth } from "../hooks/useAuth";
+import { RootStackParamList, useAuthTypes } from "../hooks/types";
 
-const Stack = createNativeStackNavigator();
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 const StackNavigator = () => {
-  const { user }: { user?: string } = useAuth();
+  const { user }: useAuthTypes = useAuth();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
         <>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Chat" component={ChatScreen} />
+          <RootStack.Screen name="Home" component={HomeScreen} />
+          <RootStack.Screen name="Chat" component={ChatScreen} />
         </>
       ) : (
-        <Stack.Screen name="Login" component={LoginScreen} />
+        <RootStack.Screen name="Login" component={LoginScreen} />
       )}
-    </Stack.Navigator>
+    </RootStack.Navigator>
   );
 };
 
