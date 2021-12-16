@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import ChatScreen from "../screens/ChatScreen";
 import LoginScreen from "../screens/LoginScreen";
+import ModalScreen from "../screens/ModalScreen";
 import { useAuth } from "../hooks/useAuth";
 import { RootStackParamList, useAuthTypes } from "../hooks/types";
 
@@ -16,8 +17,13 @@ const StackNavigator = () => {
     <RootStack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
         <>
-          <RootStack.Screen name="Home" component={HomeScreen} />
-          <RootStack.Screen name="Chat" component={ChatScreen} />
+          <RootStack.Group>
+            <RootStack.Screen name="Home" component={HomeScreen} />
+            <RootStack.Screen name="Chat" component={ChatScreen} />
+          </RootStack.Group>
+          <RootStack.Group screenOptions={{ presentation: "modal" }}>
+            <RootStack.Screen name="Modal" component={ModalScreen} />
+          </RootStack.Group>
         </>
       ) : (
         <RootStack.Screen name="Login" component={LoginScreen} />

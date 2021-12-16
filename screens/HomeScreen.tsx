@@ -14,7 +14,7 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import Swiper from "react-native-deck-swiper";
 
 import { useAuth } from "../hooks/useAuth";
-import { RootStackParamList, useAuthTypes } from "../hooks/types";
+import { RootStackParamList, Routes, useAuthTypes } from "../hooks/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 const HomeScreen = () => {
@@ -65,14 +65,14 @@ const HomeScreen = () => {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate(Routes.modal)}>
           <Image
             style={tw("h-14 w-14")}
             source={require("../assets/logo.png")}
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
+        <TouchableOpacity onPress={() => navigation.navigate(Routes.chat)}>
           <Ionicons name="chatbubbles-sharp" size={30} color="#FF5864" />
         </TouchableOpacity>
       </View>
