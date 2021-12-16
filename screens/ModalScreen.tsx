@@ -12,11 +12,11 @@ import {
 } from "react-native";
 import tw from "tailwind-rn";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
 import { db } from "../firebase";
 import { RootStackParamList, Routes, useAuthTypes } from "../hooks/types";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigation } from "@react-navigation/native";
 
 const Modal = () => {
   const { user }: useAuthTypes = useAuth();

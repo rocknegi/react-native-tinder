@@ -1,60 +1,87 @@
-import { useNavigation } from "@react-navigation/native";
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  Button,
   SafeAreaView,
   TouchableOpacity,
   Image,
   StyleSheet,
 } from "react-native";
+
+import {
+  Profile,
+  RootStackParamList,
+  Routes,
+  useAuthTypes,
+} from "../hooks/types";
+
+import {
+  collection,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import Swiper from "react-native-deck-swiper";
+import { useNavigation } from "@react-navigation/native";
 import tw from "tailwind-rn";
 import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
-import Swiper from "react-native-deck-swiper";
 
 import { useAuth } from "../hooks/useAuth";
-import { RootStackParamList, Routes, useAuthTypes } from "../hooks/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { db } from "../firebase";
 
 const HomeScreen = () => {
   type navigationType = NativeStackNavigationProp<RootStackParamList, "Chat">;
   const navigation = useNavigation<navigationType>();
   const { logout, user }: useAuthTypes = useAuth();
+
+  const [profiles, setProfiles] = useState<Array<Profile>>([]);
+
   const swipeRef = useRef<any>(null);
 
-  const DUMMY_DATA = [
-    {
-      id: 1,
-      firstname: "Taylor",
-      lastName: "Swift",
-      job: "Singer",
-      age: 24,
-      photoURL:
-        "https://www.biography.com/.image/ar_1:1%2Cc_fill%2Ccs_srgb%2Cg_face%2Cq_auto:good%2Cw_300/MTU1NDc3MTEyODE0MzE0NTcy/taylor-swift-attends-the-2016-vanity-fair-oscar-party-hosted-by-graydon-carter-at-wallis-annenberg-center-for-the-performing-arts-on-february-28-2016-in-beverly-hills-california-photo-by-anthony-harve.jpg",
-    },
-    {
-      id: 2,
-      firstname: "Olivia ",
-      lastName: "Rodrigo",
-      job: "Singer",
-      age: 24,
-      photoURL:
-        "https://www.biography.com/.image/ar_1:1%2Cc_fill%2Ccs_srgb%2Cg_face%2Cq_auto:good%2Cw_300/MTg0ODYwOTg5MDMwNjcxNDgw/gettyimages-1184956791.jpg",
-    },
-    {
-      id: 3,
-      firstname: "Dua ",
-      lastName: "Lipa",
-      job: "Singer",
-      age: 24,
-      photoURL:
-        "https://www.biography.com/.image/ar_1:1%2Cc_fill%2Ccs_srgb%2Cg_face%2Cq_auto:good%2Cw_300/MTg1NjUxMjM2MTY5NTkwMTY0/gettyimages-1356296274.jpg",
-    },
-  ];
+  // Subscriber for checking if profile exist or not
+  useEffect(
+    () =>
+      onSnapshot(doc(db, "users", user?.uid!), (snapshot) => {
+        if (!snapshot.exists()) navigation.navigate(Routes.modal);
+      }),
+    []
+  );
 
+  // Subscriber for get all the users data except the logged in user
+  useEffect(() => {
+    let unsub;
+    const fetchCards = async () => {
+      // update a card manually
+
+      //   await updateDoc(doc(db, "users", "6wus6XMNdoZbYQxmp9SP"), {
+      //     id: "6wus6XMNdoZbYQxmp9SP",
+      //     displayName: "alexandra daddario",
+      //     photoURL:
+      //       "https://assets.cdn.moviepilot.de/files/edd51e04695e8c4a8cf4b7cf70a116bf3c62bdc3bf07107d79f3fdb29961/copyright/constance_0014.jpg",
+      //     job: "Singer",
+      //     age: 34,
+      //     timestamp: serverTimestamp(),
+      //   });
+
+      unsub = onSnapshot(collection(db, "users"), (snapshot) => {
+        const temp: any = snapshot.docs
+          .filter((doc) => doc.id !== user?.uid)
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        setProfiles(temp);
+      });
+    };
+    fetchCards();
+    return unsub;
+  }, []);
   return (
-    <SafeAreaView style={tw("flex-1")}>
+    <SafeAreaView style={tw("flex-1 mt-2 bg-white")}>
       {/* Header */}
 
       <View style={tw("mt-6 p-2 flex-row items-center justify-between")}>
@@ -88,7 +115,7 @@ const HomeScreen = () => {
           verticalSwipe={false}
           animateCardOpacity
           containerStyle={{ backgroundColor: "transparent" }}
-          cards={DUMMY_DATA}
+          cards={profiles}
           onSwipedLeft={() => console.log("swipe pass")}
           onSwipedRight={() => console.log("swipe match")}
           backgroundColor="#4FD0E9"
@@ -111,33 +138,50 @@ const HomeScreen = () => {
               },
             },
           }}
-          renderCard={(card) => (
-            <View
-              key={card.id}
-              style={tw("relative bg-white h-3/4 rounded-xl")}
-            >
-              <Image
-                style={tw("h-full w-full rounded-xl")}
-                source={{ uri: card.photoURL }}
-              />
+          renderCard={(card) =>
+            card ? (
+              <View
+                key={card.id}
+                style={tw("relative bg-white h-3/4 rounded-xl")}
+              >
+                <Image
+                  style={tw("h-full w-full rounded-xl")}
+                  source={{ uri: card.photoURL }}
+                />
+                <View
+                  style={[
+                    tw(
+                      "absolute bottom-0 flex-row justify-between items-center bg-white w-full h-20 px-6 py-2 rounded-b-xl"
+                    ),
+                    styles.cardShadow,
+                  ]}
+                >
+                  <View>
+                    <Text style={tw("text-xl font-bold")}>
+                      {card.displayName}
+                    </Text>
+                    <Text>{card.job}</Text>
+                  </View>
+                  <Text style={tw("text-2xl font-bold")}>{card.age}</Text>
+                </View>
+              </View>
+            ) : (
               <View
                 style={[
                   tw(
-                    "absolute bottom-0 flex-row justify-between items-center bg-white w-full h-20 px-6 py-2 rounded-b-xl"
+                    "relative bg-white h-3/4 rounded-xl justify-center items-center"
                   ),
                   styles.cardShadow,
                 ]}
               >
-                <View>
-                  <Text style={tw("text-xl font-bold")}>
-                    {card.firstname} {card.lastName}
-                  </Text>
-                  <Text>{card.job}</Text>
-                </View>
-                <Text style={tw("text-2xl font-bold")}>{card.age}</Text>
+                <Text style={tw("font-bold pb-5")}> No more profiles </Text>
+                <Image
+                  style={tw("h-24 w-24")}
+                  source={{ uri: "https://links.papareact.com/6gb" }}
+                />
               </View>
-            </View>
-          )}
+            )
+          }
         />
       </View>
       <View style={tw("flex flex-row justify-evenly mb-2")}>

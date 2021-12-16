@@ -22,3 +22,11 @@ export enum Routes {
   login = "Login",
   modal = "Modal",
 }
+
+export interface Profile {
+  id: number;
+  displayName: string;
+  job: string;
+  age: number;
+  photoURL: string;
+}
