@@ -35,10 +35,10 @@
               "client_type": 3
             },
             {
-              "client_id": "465536864751-o4urelvd448tfcg4up2k7q22elkvg7p4.apps.googleusercontent.com",
+              "client_id": "465536864751-l0g6tdnh0vs5g6bqhmnrirk4is6pn8mp.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "host.expo.exponent"
+                "bundle_id": "host.exp.exponent"
               }
             }
           ]

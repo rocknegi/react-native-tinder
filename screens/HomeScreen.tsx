@@ -18,10 +18,13 @@ import {
 import {
   collection,
   doc,
+  getDocs,
   onSnapshot,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -67,19 +70,58 @@ const HomeScreen = () => {
       //     timestamp: serverTimestamp(),
       //   });
 
-      unsub = onSnapshot(collection(db, "users"), (snapshot) => {
-        const temp: any = snapshot.docs
-          .filter((doc) => doc.id !== user?.uid)
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-        setProfiles(temp);
-      });
+      const passes = await getDocs(
+        collection(db, "users", user?.uid!, "passes")
+      ).then((snapshot) => snapshot.docs.map((doc) => doc.id));
+
+      const swipes = await getDocs(
+        collection(db, "users", user?.uid!, "swipes")
+      ).then((snapshot) => snapshot.docs.map((doc) => doc.id));
+
+      const passedUserIds = passes.length > 0 ? passes : ["test"];
+      const swipedUserIds = swipes.length > 0 ? swipes : ["test"];
+
+      //Don't show user the persons that he has already swiped left / right
+      unsub = onSnapshot(
+        query(
+          collection(db, "users"),
+          where("id", "not-in", [...passedUserIds, ...swipedUserIds])
+        ),
+        (snapshot) => {
+          const temp: any = snapshot.docs
+            .filter((doc) => doc.id !== user?.uid)
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+          setProfiles(temp);
+        }
+      );
     };
     fetchCards();
     return unsub;
-  }, []);
+  }, [db]);
+  const swipeLeft = (cardIndex: number) => {
+    if (!profiles[cardIndex]) return;
+
+    const userSwiped = profiles[cardIndex];
+    console.log("You swiped PASS on", userSwiped.displayName);
+
+    setDoc(
+      doc(db, "users", user?.uid!, "passes", userSwiped.id.toString()),
+      userSwiped
+    );
+  };
+  const swipeRight = (cardIndex: number) => {
+    if (!profiles[cardIndex]) return;
+    const userSwiped = profiles[cardIndex];
+
+    console.log("You swiped on", userSwiped.displayName, userSwiped.job);
+    setDoc(
+      doc(db, "users", user?.uid!, "swipes", userSwiped.id.toString()),
+      userSwiped
+    );
+  };
   return (
     <SafeAreaView style={tw("flex-1 mt-2 bg-white")}>
       {/* Header */}
@@ -116,8 +158,8 @@ const HomeScreen = () => {
           animateCardOpacity
           containerStyle={{ backgroundColor: "transparent" }}
           cards={profiles}
-          onSwipedLeft={() => console.log("swipe pass")}
-          onSwipedRight={() => console.log("swipe match")}
+          onSwipedLeft={(cardIndex) => swipeLeft(cardIndex)}
+          onSwipedRight={(cardIndex) => swipeRight(cardIndex)}
           backgroundColor="#4FD0E9"
           overlayLabels={{
             left: {
