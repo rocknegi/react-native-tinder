@@ -18,6 +18,9 @@ export type RootStackParamList = {
     loggedInProfile: Profile;
     userSwiped: Profile;
   };
+  Message: {
+    matchDetails: any;
+  };
 };
 
 export enum Routes {
@@ -26,6 +29,7 @@ export enum Routes {
   login = "Login",
   modal = "Modal",
   match = "Match",
+  message = "Message",
 }
 
 export interface Profile {
@@ -34,4 +38,12 @@ export interface Profile {
   job: string;
   age: number;
   photoURL: string;
+}
+
+export interface MessageProps {
+  key?: string;
+  message: {
+    message: string;
+    photoURL: string;
+  };
 }
