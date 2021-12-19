@@ -18,6 +18,9 @@ import {
 import {
   collection,
   doc,
+  DocumentData,
+  DocumentSnapshot,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -35,13 +38,15 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 
 import { useAuth } from "../hooks/useAuth";
 import { db } from "../firebase";
+import { generateId } from "../lib/generateId";
 
 const HomeScreen = () => {
-  type navigationType = NativeStackNavigationProp<RootStackParamList, "Chat">;
+  type navigationType = NativeStackNavigationProp<RootStackParamList>;
   const navigation = useNavigation<navigationType>();
   const { logout, user }: useAuthTypes = useAuth();
 
   const [profiles, setProfiles] = useState<Array<Profile>>([]);
+  const [userImage] = useState<string>(user?.photoURL!);
 
   const swipeRef = useRef<any>(null);
 
@@ -99,6 +104,7 @@ const HomeScreen = () => {
       );
     };
     fetchCards();
+
     return unsub;
   }, [db]);
   const swipeLeft = (cardIndex: number) => {
@@ -112,15 +118,53 @@ const HomeScreen = () => {
       userSwiped
     );
   };
-  const swipeRight = (cardIndex: number) => {
+  const swipeRight = async (cardIndex: number) => {
     if (!profiles[cardIndex]) return;
-    const userSwiped = profiles[cardIndex];
 
-    console.log("You swiped on", userSwiped.displayName, userSwiped.job);
-    setDoc(
+    const userSwiped: Profile = profiles[cardIndex];
+
+    const loggedInUserData: DocumentData = await getDoc(
+      doc(db, "users", user?.uid!)
+    );
+
+    const loggedInProfile = loggedInUserData.data();
+
+    await setDoc(
       doc(db, "users", user?.uid!, "swipes", userSwiped.id.toString()),
       userSwiped
     );
+
+    //Check if the user swiped on you
+    const documentSnapshot = await getDoc(
+      doc(db, "users", userSwiped.id.toString(), "swipes", user?.uid!)
+    );
+    if (documentSnapshot.exists()) {
+      //user has matched with you before you matched
+      // Create a match
+      console.log("Hooray, you matched with", userSwiped.displayName);
+
+      // create a MATCH
+      setDoc(
+        doc(db, "matches", generateId(user?.uid!, userSwiped.id.toString())),
+        {
+          users: {
+            [user?.uid!]: loggedInProfile,
+            [userSwiped.id]: userSwiped,
+          },
+          userMatched: [user?.uid!, userSwiped.id],
+          timestamp: serverTimestamp(),
+        }
+      );
+      navigation.navigate(Routes.match, {
+        loggedInProfile,
+        userSwiped,
+      });
+    } else {
+      //user has swiped as first interaction between the two or didnt't
+      // get swiped on...
+
+      console.log("You swiped on", userSwiped.displayName, userSwiped.job);
+    }
   };
   return (
     <SafeAreaView style={tw("flex-1 mt-2 bg-white")}>
@@ -130,7 +174,7 @@ const HomeScreen = () => {
         <TouchableOpacity onPress={logout}>
           <Image
             style={tw("h-10 w-10 rounded-full")}
-            source={{ uri: user?.photoURL }}
+            source={{ uri: userImage ? userImage : user?.photoURL }}
           />
         </TouchableOpacity>
 

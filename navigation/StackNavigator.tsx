@@ -8,6 +8,7 @@ import LoginScreen from "../screens/LoginScreen";
 import ModalScreen from "../screens/ModalScreen";
 import { useAuth } from "../hooks/useAuth";
 import { RootStackParamList, useAuthTypes } from "../hooks/types";
+import MatchScreen from "../screens/MatchScreen";
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -23,6 +24,9 @@ const StackNavigator = () => {
           </RootStack.Group>
           <RootStack.Group screenOptions={{ presentation: "modal" }}>
             <RootStack.Screen name="Modal" component={ModalScreen} />
+          </RootStack.Group>
+          <RootStack.Group screenOptions={{ presentation: "transparentModal" }}>
+            <RootStack.Screen name="Match" component={MatchScreen} />
           </RootStack.Group>
         </>
       ) : (

@@ -14,6 +14,10 @@ export type RootStackParamList = {
   Chat: undefined;
   Login: undefined;
   Modal: undefined;
+  Match: {
+    loggedInProfile: Profile;
+    userSwiped: Profile;
+  };
 };
 
 export enum Routes {
@@ -21,6 +25,7 @@ export enum Routes {
   chat = "Chat",
   login = "Login",
   modal = "Modal",
+  match = "Match",
 }
 
 export interface Profile {
