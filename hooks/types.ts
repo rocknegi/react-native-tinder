@@ -1,7 +1,8 @@
 export interface useAuthTypes {
   signInWithGoogle?: () => void;
-  loading?: Boolean;
+  loading?: boolean;
   logout?: () => void;
+  showLoader?: (value: boolean) => void;
   user?: {
     photoURL: string;
     displayName: string;

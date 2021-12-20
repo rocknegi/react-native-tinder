@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, SafeAreaView } from "react-native";
-import tw from "tailwind-rn";
+import { SafeAreaView } from "react-native";
+
 import ChatList from "../components/ChatList";
 import Header from "../components/Header";
 

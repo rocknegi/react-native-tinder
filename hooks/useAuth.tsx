@@ -22,8 +22,8 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }: { children: {} }) => {
   const [error, setError] = useState<any>();
   const [user, setUser] = useState<{}>();
-  const [loadingInitial, setInitialLoading] = useState<Boolean>(false);
-  const [loading, setLoading] = useState<Boolean>(false);
+  const [loadingInitial, setInitialLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(
     () =>
@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: {} }) => {
           setUser(user);
           setInitialLoading(false);
         } else setUser("");
+        setLoading(false);
       }),
     []
   );
@@ -55,6 +56,7 @@ export const AuthProvider = ({ children }: { children: {} }) => {
       await signInWithCredential(auth, credential);
     } catch (error) {
       setError(error);
+      console.log(error);
     }
     setLoading(false);
   };
@@ -72,6 +74,10 @@ export const AuthProvider = ({ children }: { children: {} }) => {
     console.log(user);
   };
 
+  const showLoader = (value: boolean) => {
+    setLoading(value);
+  };
+
   const memoedvalue = useMemo(
     () => ({
       user,
@@ -79,6 +85,7 @@ export const AuthProvider = ({ children }: { children: {} }) => {
       error,
       signInWithGoogle,
       logout,
+      showLoader,
     }),
     [user, loading, error]
   );
