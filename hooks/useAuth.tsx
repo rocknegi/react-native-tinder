@@ -49,14 +49,16 @@ export const AuthProvider = ({ children }: { children: {} }) => {
     try {
       const res = await Google.logInAsync(config);
 
-      if (res.type !== "success") return;
+      if (res.type !== "success") {
+        setLoading(false);
+        return;
+      }
 
       const { idToken, accessToken } = res;
       const credential = GoogleAuthProvider.credential(idToken, accessToken);
       await signInWithCredential(auth, credential);
     } catch (error) {
       setError(error);
-      console.log(error);
     }
     setLoading(false);
   };
@@ -71,7 +73,6 @@ export const AuthProvider = ({ children }: { children: {} }) => {
       setError(error);
     }
     setLoading(false);
-    console.log(user);
   };
 
   const showLoader = (value: boolean) => {

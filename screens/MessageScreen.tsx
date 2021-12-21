@@ -29,7 +29,7 @@ import { db } from "../firebase";
 import { RootStackParamList, useAuthTypes } from "../hooks/types";
 import { useAuth } from "../hooks/useAuth";
 import { getMatchedUserInfo } from "../lib/getMatchesUserInfo";
-
+import { Ionicons } from "@expo/vector-icons";
 const MessageScreen = () => {
   const { user }: useAuthTypes = useAuth();
   type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Message">;
@@ -107,13 +107,18 @@ const MessageScreen = () => {
           )}
         >
           <TextInput
-            style={tw("h-10 text-lg")}
+            style={tw("h-10 text-lg flex-1")}
             placeholder="Send Message.."
             onChangeText={setInput}
             onSubmitEditing={sendMessage}
             value={input}
           />
-          <Button onPress={sendMessage} title="Send" color="#FF5864" />
+          <Ionicons
+            onPress={sendMessage}
+            name="send"
+            size={24}
+            color="#FF5864"
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

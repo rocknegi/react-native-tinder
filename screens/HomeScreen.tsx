@@ -39,14 +39,15 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../hooks/useAuth";
 import { db } from "../firebase";
 import { generateId } from "../lib/generateId";
+import Loader from "../components/Loader";
 
 const HomeScreen = () => {
   type navigationType = NativeStackNavigationProp<RootStackParamList>;
   const navigation = useNavigation<navigationType>();
-  const { logout, user }: useAuthTypes = useAuth();
+  const { logout, user, showLoader }: useAuthTypes = useAuth();
 
   const [profiles, setProfiles] = useState<Array<Profile>>([]);
-  const [userImage] = useState<string>(user?.photoURL!);
+  const [userImage, setUserImage] = useState<string>(user?.photoURL!);
 
   const swipeRef = useRef<any>(null);
 
@@ -61,19 +62,20 @@ const HomeScreen = () => {
 
   // Subscriber for get all the users data except the logged in user
   useEffect(() => {
+    showLoader!(true);
     let unsub;
     const fetchCards = async () => {
       // update a card manually
 
-      //   await updateDoc(doc(db, "users", "6wus6XMNdoZbYQxmp9SP"), {
-      //     id: "6wus6XMNdoZbYQxmp9SP",
-      //     displayName: "alexandra daddario",
-      //     photoURL:
-      //       "https://assets.cdn.moviepilot.de/files/edd51e04695e8c4a8cf4b7cf70a116bf3c62bdc3bf07107d79f3fdb29961/copyright/constance_0014.jpg",
-      //     job: "Singer",
-      //     age: 34,
-      //     timestamp: serverTimestamp(),
-      //   });
+      // await updateDoc(doc(db, "users", "00HQOfDZQ9US7V7Wdb0lPCGLuwp2"), {
+      //   id: "00HQOfDZQ9US7V7Wdb0lPCGLuwp2",
+      //   displayName: "Tanya Reynolds",
+      //   photoURL:
+      //     "https://www.thewikifeed.com/wp-content/uploads/2021/05/tanya-reynolds-1.jpg",
+      //   job: "Actor",
+      //   age: 30,
+      //   timestamp: serverTimestamp(),
+      // });
 
       const passes = await getDocs(
         collection(db, "users", user?.uid!, "passes")
@@ -100,8 +102,19 @@ const HomeScreen = () => {
               ...doc.data(),
             }));
           setProfiles(temp);
+
+          // save user's update pic
+          const tempUserData: any = snapshot.docs
+            .filter((doc) => doc.id == user?.uid)
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+          if (tempUserData[0] && tempUserData[0].photoURL)
+            setUserImage(tempUserData[0].photoURL);
         }
       );
+      showLoader!(false);
     };
     fetchCards();
 
@@ -168,6 +181,7 @@ const HomeScreen = () => {
   };
   return (
     <SafeAreaView style={tw("flex-1 mt-2 bg-white")}>
+      <Loader />
       {/* Header */}
 
       <View style={tw("mt-6 p-2 flex-row items-center justify-between")}>
@@ -196,7 +210,8 @@ const HomeScreen = () => {
       <View style={tw("flex-1 -mt-6")}>
         <Swiper
           ref={swipeRef}
-          stackSize={5}
+          infinite
+          stackSize={2}
           cardIndex={0}
           verticalSwipe={false}
           animateCardOpacity

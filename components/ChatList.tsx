@@ -38,7 +38,6 @@ const ChatList = () => {
 
     return subscribe;
   }, [user]);
-  //   console.log(matches);
   return (
     <>
       <Loader />

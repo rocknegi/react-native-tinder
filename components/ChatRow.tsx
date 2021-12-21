@@ -19,7 +19,6 @@ const ChatRow = ({ matchDetails }: any) => {
 
   useEffect(() => {
     setMatchedUserInfo(getMatchedUserInfo(matchDetails.users, user?.uid));
-    console.log(matchDetails);
   }, [matchDetails, user]);
 
   useEffect(

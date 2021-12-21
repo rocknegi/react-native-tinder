@@ -24,16 +24,17 @@ const Modal = () => {
   const [image, setImage] = useState<string>("");
   const [job, setJob] = useState<string>();
   const [age, setAge] = useState<string>();
+  const [displayName, setDisplayName] = useState<string>();
 
   type navigationType = NativeStackNavigationProp<RootStackParamList, "Home">;
   const navigation = useNavigation<navigationType>();
-  const incompleteForm = !image || !job || !age;
+  const incompleteForm = !image || !job || !age || !displayName;
 
   const updateUserProfile = async () => {
     try {
       await setDoc(doc(db, "users", user?.uid!), {
         id: user?.uid,
-        displayName: user?.displayName,
+        displayName,
         photoURL: image,
         job,
         age,
@@ -67,7 +68,18 @@ const Modal = () => {
       />
 
       <Text style={tw("text-center p-4 font-bold text-red-400")}>
-        Step 2: The Job
+        Step 2: Name
+      </Text>
+      <TextInput
+        value={displayName}
+        onChange={(e: NativeSyntheticEvent<TextInputChangeEventData>): void =>
+          setDisplayName(e.nativeEvent.text)
+        }
+        placeholder="Enter a occupation"
+      />
+
+      <Text style={tw("text-center p-4 font-bold text-red-400")}>
+        Step 3: The Job
       </Text>
       <TextInput
         value={job}
@@ -78,7 +90,7 @@ const Modal = () => {
       />
 
       <Text style={tw("text-center p-4 font-bold text-red-400")}>
-        Step 3: The Age
+        Step 4: The Age
       </Text>
       <TextInput
         value={age}

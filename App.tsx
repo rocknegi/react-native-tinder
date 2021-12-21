@@ -5,6 +5,8 @@ import { AuthProvider } from "./hooks/useAuth";
 import { LogBox } from "react-native";
 
 LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreAllLogs();
+
 export default function App() {
   return (
     <NavigationContainer>
